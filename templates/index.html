@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>SQLite Browser</title>
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+  <h1>SQLite Browser</h1>
+
+  <!-- Tables Section -->
+  <section>
+    <h2>Tables</h2>
+    <ul id="tableList">
+      {% for table in tables %}
+      <li>
+        <a href="#" onclick="fetchSchema('{{ table }}')">{{ table }}</a>
+      </li>
+      {% endfor %}
+    </ul>
+  </section>
+  <!-- Schema Display Section -->
+  <section>
+    <h2>Table Schema</h2>
+    <div id="schemaDisplay" style="white-space: pre-wrap; border: 1px solid #ccc; padding: 10px;"></div>
+  </section>
+  <!-- Query Form Section -->
+  <section>
+    <h2>Run a Query</h2>
+    <form id="query-form">
+      <textarea name="query" rows="5" cols="50" placeholder="Enter your SQL query here..."></textarea><br>
+      <button type="submit">Run Query</button>
+    </form>
+    <div id="query-result"></div>
+  </section>
+  <section id="hydration-panel" style="margin-top: 20px; margin-bottom: 20px;">
+    <div id="hydration-status"></div>
+    <div class="button-container">
+      <button id="hydrate-button" disabled style="display: none;">
+        Hydrate User Data
+      </button>
+      <button id="force-hydrate-button" class="force-btn">
+        Force Hydration (Reset All Data)
+      </button>
+    </div>
+  </section>
+  <!-- Sample Queries Panel -->
+  <section id="sample-queries-panel">
+    <h2>Sample Queries</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Title</th>
+          <th>Actions</th>
+          <th>SQL</th>
+        </tr>
+      </thead>
+      <tbody id="sample-queries-table">
+        <!-- Loaded via JS -->
+      </tbody>
+    </table>
+  </section>
+
+  <!-- New Query Form -->
+  <section id="new-query-panel">
+    <h2>Add New Query</h2>
+    <form id="new-query-form">
+      <input type="text" name="title" placeholder="Query Title" required><br>
+      <textarea name="sql" rows="3" cols="50" placeholder="SQL Statement" required></textarea><br>
+      <input type="text" name="table" placeholder="Table Name (optional)"><br>
+      <button type="submit">Save Query</button>
+    </form>
+    <div id="new-query-result"></div>
+  </section>
+
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+  <script>
+    // Check if database needs hydration on page load
+    function checkHydrationStatus() {
+      fetch('/check_tables')
+        .then(response => response.json())
+        .then(data => {
+          const statusDiv = document.getElementById('hydration-status');
+          const button = document.getElementById('hydrate-button');
+
+          if (data.status === 'success') {
+            if (data.data.needs_hydration) {
+              statusDiv.innerHTML = '<p>Database needs sample data. Click the button below to hydrate with test users and teams.</p>';
+              button.disabled = false;
+              button.style.display = 'block';
+            } else {
+              statusDiv.innerHTML = '<p>Database is already hydrated with sample data. Use "Force Hydration" to reset all data.</p>';
+              button.style.display = 'none';
+            }
+          } else {
+            statusDiv.innerHTML = '<p class="error">Error checking database status: ' + data.message + '</p>';
+            button.style.display = 'none';
+          }
+        })
+        .catch(err => {
+          console.error('Error checking hydration status:', err);
+          document.getElementById('hydration-status').innerHTML =
+            '<p class="error">Error communicating with server. Please try refreshing the page.</p>';
+        });
+    }
+
+    // Handle normal hydrate button click
+    document.getElementById('hydrate-button').addEventListener('click', function () {
+      executeHydration(false);
+    });
+
+    // Handle force hydrate button click
+    document.getElementById('force-hydrate-button').addEventListener('click', function () {
+      if (confirm('WARNING: This will DELETE all existing users and teams data and recreate the tables. Continue?')) {
+        executeHydration(true);
+      }
+    });
+
+    // Execute hydration with optional force parameter
+    function executeHydration(force) {
+      const statusDiv = document.getElementById('hydration-status');
+      const normalButton = document.getElementById('hydrate-button');
+      const forceButton = document.getElementById('force-hydrate-button');
+
+      // Disable buttons and show loading message
+      normalButton.disabled = true;
+      forceButton.disabled = true;
+      statusDiv.innerHTML = '<p>Hydrating database with sample data... This may take a moment.</p>';
+
+      // Execute hydration
+      fetch('/hydrate_database', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ force: force })
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.status === 'success') {
+            if (data.force_applied) {
+              statusDiv.innerHTML = '<p>Success! Database has been reset and hydrated with fresh sample user data.</p>';
+            } else {
+              statusDiv.innerHTML = '<p>Success! Database has been hydrated with sample user data.</p>';
+            }
+            normalButton.style.display = 'none';
+
+            // Reload the page after a short delay to refresh all data
+            setTimeout(() => {
+              window.location.reload();
+            }, 2000);
+          } else {
+            statusDiv.innerHTML = '<p class="error">Error: ' + data.message + '</p>';
+            normalButton.disabled = false;
+            forceButton.disabled = false;
+          }
+        })
+        .catch(err => {
+          console.error('Error hydrating database:', err);
+          statusDiv.innerHTML = '<p class="error">Error communicating with server. Please try again.</p>';
+          normalButton.disabled = false;
+          forceButton.disabled = false;
+        });
+    }
+
+    // Check hydration status when page loads
+    document.addEventListener('DOMContentLoaded', function () {
+      checkHydrationStatus();
+    });
+  </script>
+</body>
+
+</html>

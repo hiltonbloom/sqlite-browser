@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>Table: {{ table_name }}</title>
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+  <h1>Table: {{ table_name }}</h1>
+  
+  <!-- Pagination Controls -->
+  <div class="pagination-controls">
+    <div class="pagination-info">
+      <span id="pagination-status">Loading...</span>
+    </div>
+    <div class="pagination-buttons">
+      <button id="prev-page" disabled>&laquo; Previous</button>
+      <span id="page-numbers"></span>
+      <button id="next-page" disabled>Next &raquo;</button>
+    </div>
+    <div class="pagination-options">
+      <label for="rows-per-page">Rows per page:</label>
+      <select id="rows-per-page">
+        <option value="10">10</option>
+        <option value="25" selected>25</option>
+        <option value="50">50</option>
+        <option value="100">100</option>
+      </select>
+    </div>
+  </div>
+  
+  <!-- Table Data -->
+  <div class="table-container">
+    <table id="data-table">
+      <thead>
+        <tr id="table-header">
+          <!-- Column headers will be inserted here -->
+        </tr>
+      </thead>
+      <tbody id="table-body">
+        <tr>
+          <td colspan="100" class="loading-message">Loading data...</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  
+  <!-- Query Section -->
+  <section>
+    <h2>Run a Query on {{ table_name }}</h2>
+    <form id="table-query-form">
+      <textarea name="query" rows="5" cols="50" placeholder="Enter your SQL query here...">SELECT * FROM {{ table_name }} LIMIT 100;</textarea><br>
+      <button type="submit">Run Query</button>
+    </form>
+    <div id="query-result"></div>
+  </section>
+  
+  <!-- Navigation -->
+  <p><a href="{{ url_for('index') }}" class="back-link">Back to Home</a></p>
+
+  <!-- Table-specific script -->
+  <script>
+    // Global variables for pagination
+    let currentPage = 1;
+    let totalPages = 1;
+    let rowsPerPage = 25;
+    let totalRows = 0;
+    let tableColumns = [];
+    const tableName = "{{ table_name }}";
+    
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      // Set initial rows per page from select
+      rowsPerPage = parseInt(document.getElementById('rows-per-page').value);
+      
+      // Load first page of data
+      loadTableData(currentPage, rowsPerPage);
+      
+      // Set up pagination controls event listeners
+      document.getElementById('prev-page').addEventListener('click', () => {
+        if (currentPage > 1) {
+          currentPage--;
+          loadTableData(currentPage, rowsPerPage);
+        }
+      });
+      
+      document.getElementById('next-page').addEventListener('click', () => {
+        if (currentPage < totalPages) {
+          currentPage++;
+          loadTableData(currentPage, rowsPerPage);
+        }
+      });
+      
+      document.getElementById('rows-per-page').addEventListener('change', (e) => {
+        rowsPerPage = parseInt(e.target.value);
+        currentPage = 1; // Reset to first page
+        loadTableData(currentPage, rowsPerPage);
+      });
+      
+      // Handle table query form submission
+      document.getElementById('table-query-form').addEventListener('submit', function(e){
+        e.preventDefault();
+        var query = this.query.value;
+        var formData = new FormData();
+        formData.append('query', query);
+
+        fetch('/query', {
+          method: 'POST',
+          body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+          var resultDiv = document.getElementById('query-result');
+          if(data.status === 'success'){
+            if(data.data){
+              let html = '<table><thead><tr>';
+              data.columns.forEach(function(col){
+                html += '<th>' + col + '</th>';
+              });
+              html += '</tr></thead><tbody>';
+              data.data.forEach(function(row){
+                html += '<tr>';
+                data.columns.forEach(function(col){
+                  html += '<td>' + (row[col] !== null ? row[col] : '') + '</td>';
+                });
+                html += '</tr>';
+              });
+              html += '</tbody></table>';
+              resultDiv.innerHTML = html;
+            } else {
+              resultDiv.innerHTML = '<p>' + data.message + '</p>';
+            }
+          } else {
+            resultDiv.innerHTML = '<p class="error">Error: ' + data.message + '</p>';
+          }
+        })
+        .catch(err => {
+          console.error(err);
+          document.getElementById('query-result').innerHTML = '<p class="error">Error executing query.</p>';
+        });
+      });
+    });
+    
+    // Function to load table data with pagination
+    function loadTableData(page, limit) {
+      // Show loading state
+      document.getElementById('table-body').innerHTML = 
+        `<tr><td colspan="100" class="loading-message">Loading data...</td></tr>`;
+      
+      // Disable pagination buttons during load
+      document.getElementById('prev-page').disabled = true;
+      document.getElementById('next-page').disabled = true;
+      
+      // Call the optimized API endpoint
+      fetch(`/api/table/${tableName}/data?page=${page}&limit=${limit}`)
+      .then(response => response.json())
+      .then(data => {
+        if(data.status === 'success'){
+          // Update global variables
+          tableColumns = data.columns;
+          totalRows = data.pagination.total_rows;
+          totalPages = data.pagination.total_pages;
+          currentPage = data.pagination.page;
+          
+          // Render table header if not already done
+          renderTableHeader(tableColumns);
+          
+          // Render table data
+          if(data.data && data.data.length > 0){
+            renderTableData(data.data, tableColumns);
+          } else {
+            document.getElementById('table-body').innerHTML = 
+              `<tr><td colspan="${tableColumns.length}" class="empty-message">No data found</td></tr>`;
+          }
+          
+          // Update pagination info and controls
+          updatePaginationInfo();
+          updatePaginationControls();
+        } else {
+          document.getElementById('table-body').innerHTML = 
+            `<tr><td colspan="100" class="error">Error: ${data.message}</td></tr>`;
+          
+          // Re-enable pagination buttons
+          document.getElementById('prev-page').disabled = false;
+          document.getElementById('next-page').disabled = false;
+        }
+      })
+      .catch(err => {
+        console.error('Error loading data:', err);
+        document.getElementById('table-body').innerHTML = 
+          `<tr><td colspan="100" class="error">Error loading data. Please try again.</td></tr>`;
+        
+        // Re-enable pagination buttons
+        document.getElementById('prev-page').disabled = false;
+        document.getElementById('next-page').disabled = false;
+      });
+    }
+    
+    // Function to render table header
+    function renderTableHeader(columns) {
+      const headerRow = document.getElementById('table-header');
+      
+      // Only rebuild header if needed
+      if (headerRow.children.length !== columns.length) {
+        headerRow.innerHTML = '';
+        
+        columns.forEach(col => {
+          const th = document.createElement('th');
+          th.textContent = col;
+          headerRow.appendChild(th);
+        });
+      }
+    }
+    
+    // Function to render table data
+    function renderTableData(data, columns) {
+      const tableBody = document.getElementById('table-body');
+      tableBody.innerHTML = '';
+      
+      data.forEach(row => {
+        const tr = document.createElement('tr');
+        
+        columns.forEach(col => {
+          const td = document.createElement('td');
+          td.textContent = row[col] !== null ? row[col] : '';
+          tr.appendChild(td);
+        });
+        
+        tableBody.appendChild(tr);
+      });
+    }
+    
+    // Function to update pagination controls
+    function updatePaginationControls() {
+      // Update buttons
+      document.getElementById('prev-page').disabled = currentPage <= 1;
+      document.getElementById('next-page').disabled = currentPage >= totalPages;
+      
+      // Update page numbers
+      const pageNumbersElement = document.getElementById('page-numbers');
+      
+      let pageNumbersHTML = '';
+      
+      // Logic for showing page numbers with ellipsis for large page counts
+      if (totalPages <= 7) {
+        // Show all pages if 7 or fewer
+        for (let i = 1; i <= totalPages; i++) {
+          pageNumbersHTML += `<button class="page-number ${i === currentPage ? 'active' : ''}" 
+                               onclick="goToPage(${i})">${i}</button>`;
+        }
+      } else {
+        // Always show first page
+        pageNumbersHTML += `<button class="page-number ${1 === currentPage ? 'active' : ''}" 
+                            onclick="goToPage(1)">1</button>`;
+        
+        // Show ellipsis if current page is > 3
+        if (currentPage > 3) {
+          pageNumbersHTML += `<span class="ellipsis">...</span>`;
+        }
+        
+        // Determine range around current page
+        const start = Math.max(2, currentPage - 1);
+        const end = Math.min(totalPages - 1, currentPage + 1);
+        
+        // Show pages around current page
+        for (let i = start; i <= end; i++) {
+          pageNumbersHTML += `<button class="page-number ${i === currentPage ? 'active' : ''}" 
+                             onclick="goToPage(${i})">${i}</button>`;
+        }
+        
+        // Show ellipsis if current page is < totalPages - 2
+        if (currentPage < totalPages - 2) {
+          pageNumbersHTML += `<span class="ellipsis">...</span>`;
+        }
+        
+        // Always show last page
+        pageNumbersHTML += `<button class="page-number ${totalPages === currentPage ? 'active' : ''}" 
+                          onclick="goToPage(${totalPages})">${totalPages}</button>`;
+      }
+      
+      pageNumbersElement.innerHTML = pageNumbersHTML;
+    }
+    
+    // Function to update pagination information text
+    function updatePaginationInfo() {
+      const start = ((currentPage - 1) * rowsPerPage) + 1;
+      const end = Math.min(currentPage * rowsPerPage, totalRows);
+      
+      document.getElementById('pagination-status').textContent = 
+        `Showing ${start} to ${end} of ${totalRows} entries`;
+    }
+    
+    // Function to go to a specific page
+    function goToPage(page) {
+      if (page >= 1 && page <= totalPages && page !== currentPage) {
+        currentPage = page;
+        loadTableData(currentPage, rowsPerPage);
+      }
+    }
+  </script>
+</body>
+
+</html>

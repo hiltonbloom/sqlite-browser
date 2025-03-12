@@ -1,0 +1,92 @@
+[
+    {
+        "title": "View All from Users",
+        "sql": "SELECT * FROM users;",
+        "table": "users"
+    },
+    {
+        "title": "Show Schema for Users",
+        "sql": "PRAGMA table_info(users);"
+    },
+    {
+        "title": "Count Records in Users",
+        "sql": "SELECT COUNT(*) AS count FROM users;"
+    },
+    {
+        "title": "Get User by ID",
+        "sql": "SELECT * FROM users WHERE id = 3;",
+        "table": "users"
+    },
+    {
+        "title": "Insert New User",
+        "sql": "INSERT INTO users (username, password, email, created_at) VALUES ('new_user', 'password', 'new_user@example.com', datetime('now'));"
+    },
+    {
+        "title": "Update User Password",
+        "sql": "UPDATE users SET password = 'new_password' WHERE id = 2;"
+    },
+    {
+        "title": "Delete User",
+        "sql": "DELETE FROM users WHERE id = 5;"
+    },
+    {
+        "title": "Latest Users",
+        "sql": "SELECT * FROM users ORDER BY created_at DESC LIMIT 5;",
+        "table": "users"
+    },
+    {
+        "title": "Find User by Username",
+        "sql": "SELECT * FROM users WHERE username LIKE '%john%';",
+        "table": "users"
+    },
+    {
+        "title": "Users Created This Year",
+        "sql": "SELECT * FROM users WHERE created_at >= datetime('now', 'start of year');",
+        "table": "users"
+    },
+    {
+        "title": "View All Teams",
+        "sql": "SELECT * FROM user_teams;",
+        "table": "user_teams"
+    },
+    {
+        "title": "Show Schema for Teams",
+        "sql": "PRAGMA table_info(user_teams);"
+    },
+    {
+        "title": "Users and Their Teams",
+        "sql": "SELECT u.username, t.team_name, t.joined_at FROM users u JOIN user_teams t ON u.id = t.user_id ORDER BY t.team_name, u.username;"
+    },
+    {
+        "title": "Count Users by Team",
+        "sql": "SELECT team_name, COUNT(*) as member_count FROM user_teams GROUP BY team_name ORDER BY member_count DESC;"
+    },
+    {
+        "title": "Engineering Team Members",
+        "sql": "SELECT u.* FROM users u JOIN user_teams t ON u.id = t.user_id WHERE t.team_name = 'Engineering';",
+        "table": "users"
+    },
+    {
+        "title": "Add User to Team",
+        "sql": "INSERT INTO user_teams (user_id, team_name) VALUES (16, 'Support');"
+    },
+    {
+        "title": "Remove User from Team",
+        "sql": "DELETE FROM user_teams WHERE user_id = 3 AND team_name = 'Marketing';"
+    },
+    {
+        "title": "Insert New User Id 5 (deleted_bro)",
+        "sql": "INSERT INTO users (id, username, password, first_name, last_name, email, created_at) VALUES (5, 'deleted_bro', 'password', 'deleted', 'bro', 'deleted_bro@example.com', datetime('now'));",
+        "table": null
+    },
+    {
+        "title": "Delete User (deleted_bro)",
+        "sql": "DELETE FROM users WHERE username is 'deleted_bro';",
+        "table": null
+    },
+    {
+        "title": "Get User (deleted_bro)",
+        "sql": "SELECT * FROM users WHERE username is 'deleted_bro'",
+        "table": null
+    }
+]

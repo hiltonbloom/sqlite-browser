@@ -1,0 +1,93 @@
+[
+    {
+        "title": "View All Vectors",
+        "sql": "SELECT * FROM vectors;",
+        "table": "vectors"
+    },
+    {
+        "title": "Show Schema for Vectors Table",
+        "sql": "PRAGMA table_info(vectors);"
+    },
+    {
+        "title": "Show Schema for Vectors Metadata Table",
+        "sql": "PRAGMA table_info(vectors_metadata);"
+    },
+    {
+        "title": "Count Documents in Vector Store",
+        "sql": "SELECT COUNT(DISTINCT document_id) AS document_count FROM vectors WHERE document_id IS NOT NULL;"
+    },
+    {
+        "title": "Count Vector Records",
+        "sql": "SELECT COUNT(*) AS vector_count FROM vectors;"
+    },
+    {
+        "title": "View Document IDs and Content",
+        "sql": "SELECT id, document_id, chunk_id, substr(content, 1, 100) || '...' AS content_preview FROM vectors ORDER BY document_id, chunk_id;",
+        "table": "vectors"
+    },
+    {
+        "title": "View Metadata for Vectors",
+        "sql": "SELECT * FROM vectors_metadata ORDER BY id, field;",
+        "table": "vectors_metadata"
+    },
+    {
+        "title": "View Available Document Titles",
+        "sql": "SELECT DISTINCT json_extract(metadata, '$.title') AS title, document_id FROM vectors WHERE json_extract(metadata, '$.title') IS NOT NULL ORDER BY title;",
+        "table": "vectors"
+    },
+    {
+        "title": "View Documents by Filename",
+        "sql": "SELECT DISTINCT json_extract(metadata, '$.filename') AS filename, document_id FROM vectors WHERE json_extract(metadata, '$.filename') IS NOT NULL ORDER BY filename;",
+        "table": "vectors"
+    },
+    {
+        "title": "View Chunks for Specific Document",
+        "sql": "SELECT id, chunk_id, substr(content, 1, 100) || '...' AS content_preview FROM vectors WHERE document_id = '{{REPLACE_WITH_DOCUMENT_ID}}' ORDER BY chunk_id;",
+        "table": "vectors"
+    },
+    {
+        "title": "View Documents and Their Chunk Counts",
+        "sql": "SELECT document_id, COUNT(*) AS chunk_count FROM vectors GROUP BY document_id ORDER BY chunk_count DESC;",
+        "table": "vectors"
+    },
+    {
+        "title": "View Document Types and Counts",
+        "sql": "SELECT json_extract(metadata, '$.document_type') AS document_type, COUNT(DISTINCT document_id) AS count FROM vectors GROUP BY document_type ORDER BY count DESC;",
+        "table": "vectors"
+    },
+    {
+        "title": "View Vector Size Statistics",
+        "sql": "SELECT AVG(length(vector)) AS avg_size, MIN(length(vector)) AS min_size, MAX(length(vector)) AS max_size FROM vectors;"
+    },
+    {
+        "title": "View Content Length Statistics",
+        "sql": "SELECT AVG(length(content)) AS avg_length, MIN(length(content)) AS min_length, MAX(length(content)) AS max_length FROM vectors;"
+    },
+    {
+        "title": "Get Vector by ID",
+        "sql": "SELECT id, document_id, chunk_id, substr(content, 1, 100) || '...' AS content_preview, timestamp FROM vectors WHERE id = '{{REPLACE_WITH_VECTOR_ID}}';",
+        "table": "vectors"
+    },
+    {
+        "title": "Delete Vector by ID",
+        "sql": "DELETE FROM vectors WHERE id = '{{REPLACE_WITH_VECTOR_ID}}';"
+    },
+    {
+        "title": "Delete Document and Its Vectors",
+        "sql": "DELETE FROM vectors WHERE document_id = '{{REPLACE_WITH_DOCUMENT_ID}}';"
+    },
+    {
+        "title": "View All Database Tables",
+        "sql": "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name;"
+    },
+    {
+        "title": "View Recently Added Vectors",
+        "sql": "SELECT id, document_id, chunk_id, substr(content, 1, 100) || '...' AS content_preview, timestamp FROM vectors ORDER BY timestamp DESC LIMIT 10;",
+        "table": "vectors"
+    },
+    {
+        "title": "View Vector Metadata by Field",
+        "sql": "SELECT field, COUNT(*) AS count FROM vectors_metadata GROUP BY field ORDER BY count DESC;",
+        "table": "vectors_metadata"
+    }
+]

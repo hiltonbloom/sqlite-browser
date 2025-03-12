@@ -1,0 +1,384 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 20px;
+  background: #f4f4f4;
+}
+
+h1, h2 {
+  color: #333;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+table, th, td {
+  border: 1px solid #ccc;
+}
+
+th, td {
+  padding: 8px;
+  text-align: left;
+}
+
+ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+li {
+  margin: 5px 0;
+}
+
+a {
+  color: #007BFF;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+textarea, input[type="text"] {
+  width: 100%;
+  max-width: 600px;
+  margin-bottom: 10px;
+}
+
+#sample-queries-panel, #new-query-panel {
+  margin-top: 20px;
+  background: #fff;
+  padding: 10px;
+  border: 1px solid #ddd;
+}
+
+.query-title {
+  cursor: pointer;
+  color: #007BFF;
+}
+
+.query-title:hover {
+  text-decoration: underline;
+}
+
+.toggle-sql {
+  padding: 4px 8px;
+  font-size: 0.9em;
+  cursor: pointer;
+  background-color: #f1f3f4;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.toggle-sql:hover {
+  background-color: #e8eaed;
+}
+
+.sql-text {
+  font-family: monospace;
+  background: #f9f9f9;
+  margin-top: 5px;
+  padding: 5px;
+  border: 1px dashed #ccc;
+}
+
+/* New styles for the action buttons */
+.button-container {
+  display: flex;
+  gap: 8px;
+}
+
+.action-btn {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 4px 8px;
+  cursor: pointer;
+  font-size: 0.9em;
+  transition: background-color 0.2s;
+}
+
+.add-to-editor-btn {
+  background-color: #e7f3ff;
+  color: #0066cc;
+}
+
+.run-btn {
+  background-color: #e6f4ea;
+  color: #137333;
+}
+
+.delete-btn {
+  background-color: #fce8e6;
+  color: #c5221f;
+}
+
+.add-to-editor-btn:hover {
+  background-color: #d0e7ff;
+}
+
+.run-btn:hover {
+  background-color: #ceead6;
+}
+
+.delete-btn:hover {
+  background-color: #fadad9;
+}
+
+/* Results styling */
+#query-result {
+  margin-top: 20px;
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: #fff;
+}
+
+#query-result table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+#query-result th, #query-result td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+#query-result th {
+  background-color: #f2f2f2;
+  font-weight: bold;
+}
+
+#query-result tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.error {
+  color: #c5221f;
+  font-weight: bold;
+}
+
+/* Sample queries table header */
+#sample-queries-panel table thead th {
+  background-color: #f2f2f2;
+  font-weight: bold;
+}
+
+/* Make action buttons row not expand too much */
+.query-actions {
+  width: 220px;
+}
+
+/* Additional styles for table.html */
+
+.table-container {
+  overflow-x: auto;
+  margin-bottom: 20px;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 10px;
+}
+
+.back-link {
+  display: inline-block;
+  margin-top: 20px;
+  padding: 8px 16px;
+  background-color: #f1f3f4;
+  color: #007BFF;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  text-decoration: none;
+}
+
+.back-link:hover {
+  background-color: #e8eaed;
+  text-decoration: none;
+}
+
+/* Table styling in the table view */
+.table-container table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table-container th {
+  background-color: #f2f2f2;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.table-container tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.table-container tr:hover {
+  background-color: #f5f5f5;
+}
+
+/* Add these styles to your style.css file */
+
+#hydration-panel {
+  background: #fff;
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+#hydration-status {
+  margin-bottom: 10px;
+}
+
+#hydration-status p {
+  margin: 0;
+  padding: 0;
+}
+
+#hydrate-button {
+  padding: 8px 16px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s;
+}
+
+#hydrate-button:hover {
+  background-color: #45a049;
+}
+
+#hydrate-button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+.error {
+  color: #f44336;
+  font-weight: bold;
+}
+
+/* Pagination styles */
+
+.pagination-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 15px 0;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.pagination-info {
+  color: #666;
+  font-size: 14px;
+}
+
+.pagination-buttons {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.pagination-buttons button {
+  background-color: #f1f3f4;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.pagination-buttons button:hover:not(:disabled) {
+  background-color: #e8eaed;
+}
+
+.pagination-buttons button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination-options {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pagination-options label {
+  font-size: 14px;
+  color: #666;
+}
+
+.pagination-options select {
+  padding: 5px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+.page-number {
+  min-width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f1f3f4;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  margin: 0 2px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-size: 14px;
+}
+
+.page-number:hover:not(.active) {
+  background-color: #e8eaed;
+}
+
+.page-number.active {
+  background-color: #4285f4;
+  color: white;
+  border-color: #4285f4;
+  font-weight: bold;
+}
+
+.ellipsis {
+  margin: 0 5px;
+  color: #666;
+}
+
+.loading-message, .empty-message {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+}
+
+.empty-message {
+  font-style: italic;
+}
+
+/* Improve table container for pagination */
+.table-container {
+  max-height: 500px;
+  overflow-y: auto;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+
+/* Make table headers sticky */
+.table-container thead th {
+  position: sticky;
+  top: 0;
+  background-color: #f2f2f2;
+  z-index: 10;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.1);
+}
+
+/* Add hover effect to table rows */
+.table-container tbody tr:hover {
+  background-color: #f5f5f5;
+}
